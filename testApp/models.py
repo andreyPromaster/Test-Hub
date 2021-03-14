@@ -7,6 +7,10 @@ class Quiz(models.Model):
     date = models.DateField(verbose_name="Дата создания", auto_now_add=True)
     description = models.TextField(verbose_name="Описание теста", blank=True)
     name = models.CharField(max_length=60, verbose_name="Название теста")
+    passing_grade = models.PositiveSmallIntegerField(verbose_name="Проходной балл")
+    time_limit = models.DurationField(verbose_name="Ограничения по времени", null=True)
+    start_datetime = models.DateTimeField(verbose_name="Время начала теста", null=True)
+    end_datetime = models.DateTimeField(verbose_name="Время закрытия теста", null=True)
 
 
 class Tag(models.Model):
@@ -40,3 +44,18 @@ class Answer(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Result(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='taken_quizzes')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='taken_quizzes')
+    score = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)
+
+
+class StudentAnswer(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_answers')
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='+')
+    taken_quiz = models.ForeignKey(Result, on_delete=models.CASCADE,
+                                   related_name='taken_quiz_answers',
+                                   null=True)
